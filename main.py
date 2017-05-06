@@ -6,6 +6,7 @@ import json
 
 from flask import Flask
 from flask import render_template
+from flask_cors import CORS, cross_origin
 
 from getFollowUser import getFollowUser
 from getUserMovie import getUserMovie
@@ -76,6 +77,7 @@ def process():
 
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/data')
 def getdata():

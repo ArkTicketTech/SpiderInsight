@@ -99,7 +99,7 @@
         };
 
         function refresh() {
-            $.get("localhost:5000/data", function(result){
+            $.get("http://localhost:5000/data", function(result){
                 dataList = result.dataList;
                 linksList = result.linksList;
             });
