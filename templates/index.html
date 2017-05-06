@@ -98,13 +98,32 @@
             }]
         };
 
+        function decode(x) {
+            var r = /\\u([\d\w]{4})/gi;
+            x = x.replace(r, function (match, grp) {
+                return String.fromCharCode(parseInt(grp, 16)); 
+            });
+            x = unescape(x);
+            return x;
+        }
+
         function refresh() {
             $.get("http://localhost:5000/data", function(result){
-                dataList = result.dataList;
-                linksList = result.linksList;
+                option.series[0].data = result.data;
+                option.series[0].links = result.links;
+
+                option.series[0].data.forEach(function(element) {
+                    element.name = decode(element.name);
+                }, this);
+
+                option.series[0].links.forEach(function(element) {
+                    element.source = decode(element.source);
+                    element.target = decode(element.target);
+                }, this);
+                
+                myChart.setOption(option);
             });
             // 使用刚指定的配置项和数据显示图表。
-            myChart.setOption(option);
         }
 
         refresh();

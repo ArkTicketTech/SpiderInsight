@@ -38,12 +38,6 @@ class getMovieUser:
         movie_Users_Count = re.findall(Count_pattern, movie_Count_Container)[0]
         movie_Users_Count = int(movie_Users_Count)
         
-        # user_Movies_Page_Count = user_Movies_Count / 15
-        
-        # if (user_Movies_Page_Count > 5):
-        #     user_Movies_Page_Count = 5
-
-
         for each in movie_User_Container:
             each = str(each)
             movieUsers.append(self.parser_user_info(each))

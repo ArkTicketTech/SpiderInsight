@@ -5,6 +5,7 @@ import random
 import json
 
 from flask import Flask
+from flask import jsonify
 from flask import render_template
 from flask_cors import CORS, cross_origin
 
@@ -36,9 +37,8 @@ def linkParser(source, target):
     obj["target"] = target
     return obj
 
-def process():
+def processUU():
     uid = 'nulland'
-    uname = '\xe7\x94\xbb\xe5\xa4\xa9'
     mid = '26210985'
     fu = getFollowUser(uid, 0)
     foo = fu.getUsers()
@@ -52,8 +52,9 @@ def process():
     dataList = []
     linksList = []
     
-    dataList.append(dataParser(foo.pop(0)))
-    source = uname
+    tmp = foo.pop(0)
+    dataList.append(dataParser(tmp))
+    source = tmp[1]
 
     for each in foo:
         dataList.append(dataParser(each))
@@ -67,8 +68,6 @@ def process():
             dataList.append(dataParser(child))
             linksList.append(linkParser(each[1], child[1]))
     
-    print(linksList)
-
     # um = getUserMovie(uid)
     # print(um.getMovies())
 
@@ -82,12 +81,12 @@ CORS(app)
 @app.route('/data')
 def getdata():
     global dataList, linksList
-    process()
+    processUU()
     obj = {
         "data": dataList,
         "links": linksList
     }
-    return json.dumps(obj)
+    return jsonify(obj)
 
 @app.route('/')
 def hi():
