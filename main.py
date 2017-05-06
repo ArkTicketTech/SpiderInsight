@@ -3,7 +3,9 @@
 
 import random
 import json
+
 from flask import Flask
+from flask import render_template
 
 from getFollowUser import getFollowUser
 from getUserMovie import getUserMovie
@@ -75,11 +77,21 @@ def process():
 
 app = Flask(__name__)
 
-@app.route('/')
-def hello_world():
-    global linksList, dataList
+@app.route('/data')
+def getdata():
+    global dataList, linksList
     process()
-    return json.dumps(linksList)
+    obj = {
+        "data": dataList,
+        "links": linksList
+    }
+    return json.dumps(obj)
+
+@app.route('/')
+def hi():
+    return render_template('index.html')
+
+
 
 if __name__ == '__main__':
     app.run()
