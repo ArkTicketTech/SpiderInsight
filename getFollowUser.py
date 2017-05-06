@@ -25,7 +25,7 @@ class getFollowUser:
     def parser_follow_info(self, user):
         Id, Name = re.findall(IdName_pattern, user)[0]
         Img = re.findall(Img_pattern, user)[0]
-        Content = (Id, Name, Img)
+        Content = [Id, Name, Img]
         return Content
 
     def getUsers(self):
@@ -52,7 +52,7 @@ class getFollowUser:
         if (user_Followers_Page_Count > 2):
             user_Followers_Page_Count = 2
 
-        userFollowers.append((self.id, user_Info_Name, user_Info_Img))
+        userFollowers.append([self.id, user_Info_Name, user_Info_Img])
 
         for each in user_Followers_List_Container:
             each = str(each)

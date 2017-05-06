@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
+
 import random
+import json
+from flask import Flask
+
 from getFollowUser import getFollowUser
 from getUserMovie import getUserMovie
 from getMovieUser import getMovieUser
 
+dataList = []
+linksList = []
 
 def dataParser(data):
     obj = {
@@ -27,18 +33,22 @@ def linkParser(source, target):
     obj["target"] = target
     return obj
 
-def main():
+def process():
     uid = 'nulland'
-    uname = 'nulland'
-    uimg = 'https://img3.doubanio.com/icon/u1926553-164.jpg'
+    uname = '\xe7\x94\xbb\xe5\xa4\xa9'
     mid = '26210985'
     fu = getFollowUser(uid, 0)
     foo = fu.getUsers()
     l = 5 if len(foo) > 5 else len(foo)
     foo = random.sample(foo, l)
+    print(foo)
+
+    global dataList
+    global linksList
 
     dataList = []
     linksList = []
+    
     dataList.append(dataParser(foo.pop(0)))
     source = uname
 
@@ -53,15 +63,8 @@ def main():
         for child in foo:
             dataList.append(dataParser(child))
             linksList.append(linkParser(each[1], child[1]))
-         
     
-    print(dataList)
     print(linksList)
-        
-
-
-
-
 
     # um = getUserMovie(uid)
     # print(um.getMovies())
@@ -70,5 +73,13 @@ def main():
     # print(mu.getUsers())
 
 
+app = Flask(__name__)
 
-main()
+@app.route('/')
+def hello_world():
+    global linksList, dataList
+    process()
+    return json.dumps(linksList)
+
+if __name__ == '__main__':
+    app.run()
