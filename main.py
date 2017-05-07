@@ -6,6 +6,7 @@ import json
 import requests
 
 from flask import Flask
+from flask import request
 from flask import jsonify
 from flask import render_template
 from flask_cors import CORS, cross_origin
@@ -72,8 +73,8 @@ def face_detect(imgurl):
     return r.content
 
 # user's following's following
-def processUUU():
-    uid = 'nulland'
+def processUUU(uid):
+    # uid = 'nulland'
     mid = '26210985'
     fu = getFollowUser(uid, 0)
     foo = fu.getUsers()
@@ -104,8 +105,8 @@ def processUUU():
             linksList.append(linkParser(each[1], child[1]))
 
 # user's movies' user
-def processUMU():
-    uid = 'nulland'
+def processUMU(uid):
+    # uid = 'nulland'
     mid = '26210985'
     um = getUserMovie(uid)
     foo = um.getMovies()
@@ -133,9 +134,6 @@ def processUMU():
         for child in foo:
             dataList.append(dataParser(child))
             linksList.append(linkParser(each[1], child[1]))
-
-    print(dataList)
-    print(linksList)
     
     # um = getUserMovie(uid)
     # print(um.getMovies())
@@ -150,7 +148,8 @@ CORS(app)
 @app.route('/data')
 def getdata():
     global dataList, linksList
-    processUUU()
+    uid = request.args.get('uid')
+    processUUU(uid)
     obj = {
         "data": dataList,
         "links": linksList
@@ -160,7 +159,8 @@ def getdata():
 @app.route('/mdata')
 def getmdata():
     global dataList, linksList
-    processUMU()
+    uid = request.args.get('uid')
+    processUMU(uid)
     obj = {
         "data": dataList,
         "links": linksList

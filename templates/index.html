@@ -3,12 +3,45 @@
 <head>
     <meta charset="utf-8">
     <!-- 引入 ECharts 文件 -->
+    <style>
+        .wrap{
+            position:relative;
+        }
+        .input-holder{
+            width: 800px;
+        }
+        .nav-search{
+            position: absolute;
+            top: 50px;
+            z-index: 100000;
+            padding: 16px 16px 16px 60px;
+            border: none;
+            background: rgba(0, 0, 0, 0.003);
+            box-shadow: inset 0 -2px 1px rgba(0,0,0,0.03);
+            margin: 0;
+            font-size: 24px;
+            font-family: inherit;
+            font-weight: inherit;
+            line-height: 1.4em;
+            -webkit-font-smoothing: antialiased;
+            width: 650px;
+            margin-left: 20px;
+            text-align: center;
+        }
+    </style>
+    </style>
     <script src="https://cdn.bootcss.com/echarts/3.5.4/echarts.min.js"></script>
     <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 </head>
 <body>
     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-    <div id="main" style="width: 800px;height:800px;"></div>
+    <div class="search-wrapper">
+        <div class="input-holder">
+            <input id="search" autofocus="autofocus" autocomplete="off" placeholder="try to search" class="nav-search">
+        </div>
+    </div>
+    <div id="main" style="width: 800px;height:800px;">
+    </div>
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('main'));
@@ -65,12 +98,15 @@
                 layout: 'force',
 
                 force: {
-                    repulsion: 50
+                    repulsion: 100
                 },
                 tooltip: {
                     formatter: function(name) {
                         console.log(name);
-                        return echarts.format.truncateText(name, 90, '14px Microsoft Yahei');
+                        var str = '';
+                        if (!!name.data.attr)
+                            str = '<div>颜值：'+name.data.attr.attractive+'</div>';
+                        return '<div><div>'+name.data.name+'</div>'+str+'<img src="'+name.data.img+'"></img></div>'
                     }
                 },
                 data: [],
@@ -107,9 +143,44 @@
             x = unescape(x);
             return x;
         }
+        
+        function search() {
+            $('#search').keyup(function(e){
+                var key = e.which;
+                if(key==13){
+                    var user_id = document.getElementById("search").value;
+                    mrefresh(user_id);
+                }
+            });
+        }
 
-        function refresh() {
-            $.get("http://localhost:5000/data", function(result){
+        search();
+        function refresh(uid) {
+            myChart.showLoading();
+            $.get("http://localhost:5000/data"+"?uid="+uid, function(result){
+                option.series[0].data = result.data;
+                option.series[0].links = result.links;
+
+                myChart.hideLoading();
+                option.series[0].data.forEach(function(element) {
+                    element.name = decode(element.name);
+                }, this);
+
+                option.series[0].links.forEach(function(element) {
+                    element.source = decode(element.source);
+                    element.target = decode(element.target);
+                }, this);
+                
+                myChart.setOption(option);
+            });
+            // 使用刚指定的配置项和数据显示图表。
+        }
+
+        function mrefresh(uid) {
+            myChart.showLoading();
+            $.get("http://localhost:5000/mdata"+"?uid="+uid, function(result){
+                myChart.hideLoading();
+
                 option.series[0].data = result.data;
                 option.series[0].links = result.links;
 
@@ -127,27 +198,7 @@
             // 使用刚指定的配置项和数据显示图表。
         }
 
-        function mrefresh() {
-            $.get("http://localhost:5000/mdata", function(result){
-                option.series[0].data = result.data;
-                option.series[0].links = result.links;
-
-                option.series[0].data.forEach(function(element) {
-                    element.name = decode(element.name);
-                }, this);
-
-                option.series[0].links.forEach(function(element) {
-                    element.source = decode(element.source);
-                    element.target = decode(element.target);
-                }, this);
-                
-                myChart.setOption(option);
-            });
-            // 使用刚指定的配置项和数据显示图表。
-        }
-
-        refresh();
-
+        refresh('nulland');
 
     </script>
 </body>
