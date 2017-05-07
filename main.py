@@ -3,6 +3,7 @@
 
 import random
 import json
+import requests
 
 from flask import Flask
 from flask import jsonify
@@ -26,6 +27,23 @@ def mdataParser(data):
     obj["name"] = data[1]
     return obj
 
+def fdataParser(data):
+    obj = {
+        "name": "",
+        "symbolSize": 9,
+        "category": "user",
+        "draggable": "true",
+        "img": "",
+        "attr": ""
+    }
+    obj["img"] = data[2]
+    obj["name"] = data[1]
+    obj["attr"] = {}
+    d = json.loads(data[3])
+    if (len(d['faces'])>0):
+        obj["attr"] = d['faces'][0]['attributes']
+    return obj  
+
 def dataParser(data):
     obj = {
         "name": "",
@@ -47,6 +65,12 @@ def linkParser(source, target):
     obj["target"] = target
     return obj
 
+def face_detect(imgurl):
+    url = 'https://v1-api.visioncloudapi.com/face/detection'
+    pl = {'api_id': 'bdd94d86390c46b99879406d61b70b0f', 'api_secret': 'b59326aeaec84c9eb0d9bda89a77cf63', 'url': imgurl,'attributes':1}
+    r = requests.post(url, params=pl)
+    return r.content
+
 # user's following's following
 def processUUU():
     uid = 'nulland'
@@ -56,7 +80,6 @@ def processUUU():
     tmp = foo.pop(0)
     l = 5 if len(foo) > 5 else len(foo)
     foo = random.sample(foo, l)
-    print(foo)
 
     global dataList
     global linksList
@@ -68,8 +91,8 @@ def processUUU():
     source = tmp[1]
 
     for each in foo:
-        print(each)
-        dataList.append(dataParser(each))
+        each = [each[0],each[1],each[2],face_detect(each[2])]
+        dataList.append(fdataParser(each))
         linksList.append(linkParser(source, each[1]))
         fu = getFollowUser(each[0], 0)
         foo = fu.getUsers()
@@ -110,6 +133,10 @@ def processUMU():
         for child in foo:
             dataList.append(dataParser(child))
             linksList.append(linkParser(each[1], child[1]))
+
+    print(dataList)
+    print(linksList)
+    
     # um = getUserMovie(uid)
     # print(um.getMovies())
 

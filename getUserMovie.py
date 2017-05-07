@@ -53,8 +53,6 @@ class getUserMovie:
             each = str(each)
             userMovies.append(self.parser_movie_info(each))
 
-        print(userMovies)
-
         for i in range(user_Movies_Page_Count):
             target = url + "?start=" + str((i+1)*15) + "&sort=time&rating=all&filter=all&mode=grid"
             res = requests.get(target, headers=headers)
