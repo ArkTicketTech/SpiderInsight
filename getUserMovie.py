@@ -14,6 +14,8 @@ from config import headers
 Id_pattern = re.compile('href="https://movie.douban.com/subject/(.*?)/"')
 Name_pattern = re.compile('\<em\>(.*?)\</em>')
 Count_pattern = re.compile('\(\d+\)')
+UserName_pattern = re.compile('<h1>(.*?)看过的电影')
+UserPic_pattern = re.compile('src="(.*?)"')
 
 class getUserMovie:
     def __init__(self, id):
@@ -33,20 +35,25 @@ class getUserMovie:
         # Container
         movie_Title_Container = bsObj.findAll('li', {'class': 'title'})
         movie_User_Container = str(bsObj.findAll('div', {'id': 'db-usr-profile'})[0])
+        movie_UserPic_Container = str(bsObj.findAll('div', {'id': 'db-usr-profile'})[0].findAll('div', {'class': 'pic'})[0])
         userMovies = []
         
         user_Movies_Count = re.findall(Count_pattern, movie_User_Container)[0].strip('(').strip(')')
         user_Movies_Count = int(user_Movies_Count)
 
+        user_Name = re.findall(UserName_pattern, movie_User_Container)[0]
+        user_Pic = re.findall(UserPic_pattern, movie_UserPic_Container)[0]
+
         user_Movies_Page_Count = user_Movies_Count / 15
-        
-        if (user_Movies_Page_Count > 5):
-            user_Movies_Page_Count = 5
+        if (user_Movies_Page_Count > 2):
+            user_Movies_Page_Count = 2
 
-
+        userMovies.append((self.id, user_Name, user_Pic))
         for each in movie_Title_Container:
             each = str(each)
             userMovies.append(self.parser_movie_info(each))
+
+        print(userMovies)
 
         for i in range(user_Movies_Page_Count):
             target = url + "?start=" + str((i+1)*15) + "&sort=time&rating=all&filter=all&mode=grid"

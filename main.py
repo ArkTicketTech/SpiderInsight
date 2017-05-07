@@ -16,6 +16,16 @@ from getMovieUser import getMovieUser
 dataList = []
 linksList = []
 
+def mdataParser(data):
+    obj = {
+        "name": "",
+        "symbolSize": 9,
+        "category": "movie",
+        "draggable": "true"
+    }
+    obj["name"] = data[1]
+    return obj
+
 def dataParser(data):
     obj = {
         "name": "",
@@ -37,11 +47,13 @@ def linkParser(source, target):
     obj["target"] = target
     return obj
 
-def processUU():
+# user's following's following
+def processUUU():
     uid = 'nulland'
     mid = '26210985'
     fu = getFollowUser(uid, 0)
     foo = fu.getUsers()
+    tmp = foo.pop(0)
     l = 5 if len(foo) > 5 else len(foo)
     foo = random.sample(foo, l)
     print(foo)
@@ -52,11 +64,11 @@ def processUU():
     dataList = []
     linksList = []
     
-    tmp = foo.pop(0)
     dataList.append(dataParser(tmp))
     source = tmp[1]
 
     for each in foo:
+        print(each)
         dataList.append(dataParser(each))
         linksList.append(linkParser(source, each[1]))
         fu = getFollowUser(each[0], 0)
@@ -67,7 +79,37 @@ def processUU():
         for child in foo:
             dataList.append(dataParser(child))
             linksList.append(linkParser(each[1], child[1]))
+
+# user's movies' user
+def processUMU():
+    uid = 'nulland'
+    mid = '26210985'
+    um = getUserMovie(uid)
+    foo = um.getMovies()
+    tmp = foo.pop(0)
+    l = 7 if len(foo) > 7 else len(foo)
+    foo = random.sample(foo, l)
+
+    global dataList
+    global linksList
+
+    dataList = []
+    linksList = []
     
+    dataList.append(dataParser(tmp))
+    source = tmp[1]
+
+    for each in foo:
+        dataList.append(mdataParser(each))
+        linksList.append(linkParser(source, each[1]))
+        mu = getMovieUser(each[0])
+        foo = mu.getUsers()
+        l = 5 if len(foo) > 5 else len(foo)
+        foo = random.sample(foo, l)
+        foo.pop(0)
+        for child in foo:
+            dataList.append(dataParser(child))
+            linksList.append(linkParser(each[1], child[1]))
     # um = getUserMovie(uid)
     # print(um.getMovies())
 
@@ -81,7 +123,17 @@ CORS(app)
 @app.route('/data')
 def getdata():
     global dataList, linksList
-    processUU()
+    processUUU()
+    obj = {
+        "data": dataList,
+        "links": linksList
+    }
+    return jsonify(obj)
+
+@app.route('/mdata')
+def getmdata():
+    global dataList, linksList
+    processUMU()
     obj = {
         "data": dataList,
         "links": linksList
@@ -91,8 +143,6 @@ def getdata():
 @app.route('/')
 def hi():
     return render_template('index.html')
-
-
 
 if __name__ == '__main__':
     app.run()
